@@ -52,7 +52,7 @@ export default function UserDashboard() {
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      router.replace("/auth");
+      router.replace('/welcome');
     } catch (error: any) {
       toast({
         title: "Error",

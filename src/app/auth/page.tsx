@@ -14,12 +14,25 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [shouldShowPage, setShouldShowPage] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // First-visit redirect logic - only runs once on mount
+    if (typeof window !== "undefined") {
+      const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
+      
+      if (!hasSeenWelcome) {
+        localStorage.setItem("hasSeenWelcome", "true");
+        router.replace("/welcome");
+      } else {
+        setShouldShowPage(true);
+      }
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +84,7 @@ export default function LoginPage() {
     }
   };
 
-  if (!mounted) {
+  if (!mounted || !shouldShowPage) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-[#8B6CFD]" />

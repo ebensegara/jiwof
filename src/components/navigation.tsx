@@ -63,7 +63,7 @@ export function DesktopSidebar({ activeTab, onTabChange }: NavigationProps) {
         description: "You've been successfully signed out.",
       });
       
-      router.push('/landing');
+      router.replace('/welcome');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -132,7 +132,7 @@ export function MobileHeader({ activeTab, onTabChange }: NavigationProps) {
         description: "You've been successfully signed out.",
       });
       
-      router.push('/landing');
+      router.replace('/welcome');
       setIsOpen(false);
     } catch (error: any) {
       toast({
