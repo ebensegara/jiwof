@@ -200,7 +200,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
         description: "You've been successfully signed out.",
       });
 
-      router.push("/landing");
+      router.replace('/welcome');
     } catch (error: any) {
       toast({
         title: "Error",

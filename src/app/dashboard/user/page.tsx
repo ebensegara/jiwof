@@ -12,6 +12,7 @@ import MoodCheckin from "@/components/mood-checkin";
 import Journal from "@/components/journal";
 import AIChat from "@/components/ai-chat";
 import ProfessionalList from "@/components/professional-list";
+import QrisSubscription from "@/components/qris-subscription";
 
 export default function UserDashboard() {
   const [activeTab, setActiveTab] = useState("mood");
@@ -52,7 +53,7 @@ export default function UserDashboard() {
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      router.replace("/auth");
+      router.replace('/welcome');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -86,6 +87,10 @@ export default function UserDashboard() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <QrisSubscription />
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="mood" className="flex items-center gap-2">
