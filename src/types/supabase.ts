@@ -641,6 +641,7 @@ export type Database = {
       plans: {
         Row: {
           created_at: string | null
+          description: string | null
           duration_days: number
           features: string[] | null
           id: string
@@ -649,6 +650,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
           duration_days: number
           features?: string[] | null
           id?: string
@@ -657,6 +659,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          description?: string | null
           duration_days?: number
           features?: string[] | null
           id?: string
@@ -802,6 +805,7 @@ export type Database = {
           created_at: string | null
           end_date: string | null
           id: string
+          payment_ref: string | null
           plan_id: string
           start_date: string | null
           status: string | null
@@ -812,6 +816,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          payment_ref?: string | null
           plan_id: string
           start_date?: string | null
           status?: string | null
@@ -822,6 +827,7 @@ export type Database = {
           created_at?: string | null
           end_date?: string | null
           id?: string
+          payment_ref?: string | null
           plan_id?: string
           start_date?: string | null
           status?: string | null

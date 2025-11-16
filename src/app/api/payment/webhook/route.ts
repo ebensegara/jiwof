@@ -76,12 +76,20 @@ export async function POST(request: NextRequest) {
 async function processSubscriptionPayment(payment: any) {
   const metadata = payment.metadata || {};
   const plan_id = metadata.plan_id;
-  const duration_days = metadata.duration_days || 30;
 
   if (!plan_id) {
     console.error('Missing plan_id in payment metadata');
     return;
   }
+
+  // Get plan details to get duration_days
+  const { data: plan } = await supabase
+    .from('plans')
+    .select('duration_days')
+    .eq('id', plan_id)
+    .single();
+
+  const duration_days = plan?.duration_days || 30;
 
   const start_date = new Date();
   const end_date = new Date();
@@ -96,7 +104,6 @@ async function processSubscriptionPayment(payment: any) {
       status: 'active',
       start_date: start_date.toISOString(),
       end_date: end_date.toISOString(),
-      payment_ref: payment.ref_code,
     });
 
   if (error) {
@@ -111,7 +118,7 @@ async function processSubscriptionPayment(payment: any) {
       {
         user_id: payment.user_id,
         is_premium: true,
-        chat_limit: 999999, // Unlimited for premium
+        chat_limit: 999999,
         updated_at: new Date().toISOString(),
       },
       { 
@@ -141,7 +148,6 @@ async function processBookingPayment(payment: any) {
     .from('bookings')
     .update({
       status: 'paid',
-      payment_ref: payment.ref_code,
     })
     .eq('id', booking_id);
 
