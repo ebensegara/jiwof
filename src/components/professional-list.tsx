@@ -10,6 +10,8 @@ import { supabase } from '@/lib/supabase';
 import { useToast } from '@/components/ui/use-toast';
 import ChatLauncher from './care-chat/ChatLauncher';
 import BookingModal from './booking-modal';
+import { useRouter } from 'next/navigation';
+import ProOnlineList from './pro-online-list';
 
 interface Professional {
   id: string;
@@ -26,14 +28,16 @@ interface Professional {
 interface ProfessionalListProps {
   category?: string;
   onBack?: () => void;
+  embedded?: boolean;
 }
 
-export default function ProfessionalList({ category = "all", onBack }: ProfessionalListProps) {
+export default function ProfessionalList({ category = "all", onBack, embedded = false }: ProfessionalListProps) {
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProfessional, setSelectedProfessional] = useState<Professional | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchProfessionals() {
@@ -75,33 +79,41 @@ export default function ProfessionalList({ category = "all", onBack }: Professio
     setSelectedProfessional(null);
   };
 
-  // Get initials from name
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase();
   };
 
+  const containerClass = embedded 
+    ? "" 
+    : "min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 p-6";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className={containerClass}>
+      <div className={embedded ? "" : "max-w-6xl mx-auto"}>
         {/* Header */}
-        <div className="mb-8">
-          {onBack && (
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="mb-4 flex items-center gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Care Options
-            </Button>
-          )}
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            {category === "all" ? "All" : category} Professionals
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Connect with verified professionals who can support your mental wellness journey
-          </p>
-        </div>
+        {!embedded && (
+          <div className="mb-8">
+            {onBack && (
+              <Button
+                variant="ghost"
+                onClick={onBack}
+                className="mb-4 flex items-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Care Options
+              </Button>
+            )}
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+              {category === "all" ? "All" : category} Professionals
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Connect with verified professionals who can support your mental wellness journey
+            </p>
+          </div>
+        )}
+
+        {/* Online Professionals Section */}
+        <ProOnlineList />
 
         {/* Professionals Grid */}
         {isLoading ? (
@@ -122,7 +134,6 @@ export default function ProfessionalList({ category = "all", onBack }: Professio
               <Card key={professional.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start gap-4">
-                    {/* Professional Photo */}
                     <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
                       <AvatarImage 
                         src={professional.avatar_url} 
@@ -163,15 +174,18 @@ export default function ProfessionalList({ category = "all", onBack }: Professio
 
                   <div className="flex gap-2">
                     <Button
+                      onClick={() => router.push(`/professionals/${professional.id}`)}
+                      variant="outline"
+                      className="flex-1"
+                    >
+                      View Profile
+                    </Button>
+                    <Button
                       onClick={() => handleBookSession(professional)}
                       className="flex-1 bg-[#756657] hover:bg-[#756657]/90 text-white"
                     >
                       Book Session
                     </Button>
-                    <ChatLauncher
-                      professionalId={professional.id}
-                      professionalName={professional.full_name}
-                    />
                   </div>
                 </CardContent>
               </Card>

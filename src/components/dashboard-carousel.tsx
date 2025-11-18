@@ -45,7 +45,7 @@ const pages = [
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ProfessionalList category="all" />
+          <ProfessionalList category="all" embedded={true} />
         </CardContent>
       </Card>
     ),
