@@ -6,13 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Send, Bot, User, AlertCircle, ArrowLeft } from "lucide-react";
+import { Send, Bot, User, AlertCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import TopicSelector from "@/components/topic-selection";
-import { sendTopicWebhook, type Topic } from "@/lib/topicWebhook";
 
 interface Message {
   id: string;
@@ -21,14 +18,17 @@ interface Message {
   created_at: string;
 }
 
+interface AIChatProps {
+  webhookUrl?: string | null;
+}
+
 interface ChatUsage {
   chat_count: number;
   chat_limit: number;
   is_premium: boolean;
 }
 
-export default function AIChat() {
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+export default function AIChat({ webhookUrl }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -41,6 +41,7 @@ export default function AIChat() {
     fetchMessages();
     fetchChatUsage();
 
+    // Subscribe to realtime changes
     const channel = supabase
       .channel("chat_messages_changes")
       .on(
@@ -64,6 +65,7 @@ export default function AIChat() {
       } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Use limit(1) to ensure we only get one record
       const { data, error } = await supabase
         .from("chat_usage")
         .select("*")
@@ -77,6 +79,7 @@ export default function AIChat() {
       }
 
       if (!data) {
+        // Create new chat_usage record with upsert to prevent duplicates
         const { data: newUsage, error: insertError } = await supabase
           .from("chat_usage")
           .upsert(
@@ -117,6 +120,7 @@ export default function AIChat() {
       if (error) throw error;
 
       if (!data || data.length === 0) {
+        // Add welcome message if no messages exist
         const welcomeMessage = {
           id: "welcome",
           content:
@@ -154,36 +158,6 @@ export default function AIChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleTopicSelect = async (topic: Topic) => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      await sendTopicWebhook(topic, user.id);
-
-      setSelectedTopic(topic);
-      
-      toast({
-        title: "Topic Selected",
-        description: `You're now chatting about ${topic.title}`,
-      });
-    } catch (error: any) {
-      console.error("Error selecting topic:", error);
-      toast({
-        title: "Warning",
-        description: "Topic selected, but webhook notification failed. You can still chat.",
-        variant: "default",
-      });
-      setSelectedTopic(topic);
-    }
-  };
-
-  const handleBackToTopics = () => {
-    setSelectedTopic(null);
-  };
-
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -193,6 +167,7 @@ export default function AIChat() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Check chat limit
       if (chatUsage && !chatUsage.is_premium && chatUsage.chat_count >= chatUsage.chat_limit) {
         toast({
           title: "Chat Limit Reached",
@@ -204,6 +179,7 @@ export default function AIChat() {
 
       const userMessage = inputValue;
 
+      // Save user message
       const { error: userError } = await supabase.from("chat_messages").insert([
         {
           user_id: user.id,
@@ -217,11 +193,15 @@ export default function AIChat() {
       setInputValue("");
       setIsTyping(true);
 
+      // Call webhook - use the provided webhookUrl or fallback to edge function
       try {
         let aiResponse;
 
-        if (selectedTopic?.webhookUrl) {
-          const webhookResponse = await fetch(selectedTopic.webhookUrl, {
+        if (webhookUrl) {
+          // Direct webhook call with topic-specific URL
+          console.log('Calling topic-specific webhook:', webhookUrl);
+          
+          const webhookResponse = await fetch(webhookUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -229,7 +209,6 @@ export default function AIChat() {
             body: JSON.stringify({
               message: userMessage,
               userId: user.id,
-              topic: selectedTopic.id,
               timestamp: new Date().toISOString(),
             }),
           });
@@ -241,6 +220,9 @@ export default function AIChat() {
           const webhookData = await webhookResponse.json();
           aiResponse = webhookData?.message || webhookData?.output || webhookData?.response || webhookData?.advice;
         } else {
+          // Fallback to edge function
+          console.log('Calling edge function with:', { message: userMessage, userId: user.id });
+          
           const { data, error: functionError } = await supabase.functions.invoke(
             'supabase-functions-n8n-webhook-proxy',
             {
@@ -259,10 +241,14 @@ export default function AIChat() {
           aiResponse = data?.message || data?.output || data?.response || data?.advice;
         }
 
+        // Use fallback if no response
         if (!aiResponse) {
           aiResponse = "Thank you for sharing. I'm here to support you on your mental health journey.";
         }
 
+        console.log('AI response extracted:', aiResponse);
+
+        // Save AI response to database
         const { error: aiError } = await supabase.from("chat_messages").insert([
           {
             user_id: user.id,
@@ -273,11 +259,14 @@ export default function AIChat() {
 
         if (aiError) throw aiError;
 
+        // Use RPC or direct increment to avoid race conditions
         const { error: updateError } = await supabase.rpc('increment_chat_count', {
           p_user_id: user.id
         });
 
         if (updateError) {
+          console.error('Update error:', updateError);
+          // Fallback to manual update if RPC doesn't exist
           const { data: currentUsage } = await supabase
             .from("chat_usage")
             .select("chat_count")
@@ -294,9 +283,15 @@ export default function AIChat() {
             .eq("user_id", user.id);
         }
 
+        console.log('Chat count updated successfully');
+
+        // Refresh chat usage to update UI
         await fetchChatUsage();
 
       } catch (webhookError: any) {
+        console.error('Webhook error details:', webhookError);
+        
+        // Fallback to local response if webhook fails
         const fallbackResponse =
           "I'm here to listen and support you. Could you tell me more about what's on your mind?";
 
@@ -310,6 +305,7 @@ export default function AIChat() {
 
         if (aiError) throw aiError;
 
+        // Use RPC or direct increment
         const { error: updateError } = await supabase.rpc('increment_chat_count', {
           p_user_id: user.id
         });
@@ -331,6 +327,7 @@ export default function AIChat() {
             .eq("user_id", user.id);
         }
 
+        // Refresh chat usage
         await fetchChatUsage();
 
         toast({
@@ -369,45 +366,25 @@ export default function AIChat() {
     );
   }
 
-  if (!selectedTopic) {
-    return <TopicSelector onSelectTopic={handleTopicSelect} />;
-  }
-
   const isLimitReached = chatUsage && !chatUsage.is_premium && chatUsage.chat_count >= chatUsage.chat_limit;
   const remainingChats = chatUsage ? Math.max(0, chatUsage.chat_limit - chatUsage.chat_count) : 0;
 
   return (
     <div className="flex flex-col h-full">
+      {/* Header */}
       <Card className="mb-4">
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-primary/10 rounded-full">
-                <Bot className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  AI Wellness Companion
-                  <Badge variant="secondary" className="text-xs">
-                    Topic: {selectedTopic.title}
-                  </Badge>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  A safe space to share your thoughts and feelings
-                </p>
-              </div>
+          <CardTitle className="flex items-center space-x-2">
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Bot className="h-5 w-5 text-primary" />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToTopics}
-              className="flex items-center gap-1"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Change Topic
-            </Button>
-          </div>
+            <span>AI Wellness Companion</span>
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            A safe space to share your thoughts and feelings
+          </p>
           
+          {/* Chat Usage Indicator */}
           {chatUsage && !chatUsage.is_premium && (
             <div className="mt-2">
               <div className="flex items-center justify-between text-xs">
@@ -433,6 +410,7 @@ export default function AIChat() {
         </CardHeader>
       </Card>
 
+      {/* Limit Warning */}
       {isLimitReached && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
@@ -443,6 +421,7 @@ export default function AIChat() {
         </Alert>
       )}
 
+      {/* Chat Messages */}
       <Card className="flex-1 flex flex-col">
         <CardContent className="flex-1 p-0">
           <ScrollArea ref={scrollAreaRef} className="h-[500px] p-4">
@@ -518,6 +497,7 @@ export default function AIChat() {
           </ScrollArea>
         </CardContent>
 
+        {/* Input Area */}
         <div className="border-t p-4">
           <div className="flex space-x-2">
             <Input
