@@ -12,7 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BookOpen, Plus, Edit, Trash2, Calendar, Heart } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 
 interface JournalEntry {
   id: string;
@@ -66,7 +66,7 @@ export default function Journal() {
 
   const fetchEntries = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -112,7 +112,7 @@ export default function Journal() {
 
   const handleSaveEntry = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error('Not authenticated');
 
       const selectedMood = moodOptions.find(m => m.value === formData.moodValue);

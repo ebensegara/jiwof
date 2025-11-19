@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 import ChatWindow from './ChatWindow';
 import { MessageCircle, User, Loader2, ArrowLeft } from 'lucide-react';
@@ -64,7 +64,7 @@ export default function UserInbox() {
 
   const initializeInbox = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) {
         toast({
           title: 'Authentication Required',
@@ -88,7 +88,7 @@ export default function UserInbox() {
   };
 
   const fetchChannels = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getSafeUser();
     if (!user) return;
 
     const { data: channelsData, error: channelsError } = await supabase

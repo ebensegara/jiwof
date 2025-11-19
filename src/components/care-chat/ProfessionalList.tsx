@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 import ChatLauncher from './ChatLauncher';
 import { User, Loader2, ArrowLeft } from 'lucide-react';
@@ -36,7 +36,7 @@ export default function ProfessionalList() {
   }, []);
 
   const checkUserRole = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getSafeUser();
     if (!user) return;
 
     const { data } = await supabase

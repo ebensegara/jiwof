@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Send, Bot, User, AlertCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -162,9 +162,7 @@ export default function AIChat({ webhookUrl }: AIChatProps) {
     if (!inputValue.trim()) return;
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error("Not authenticated");
 
       // Check chat limit

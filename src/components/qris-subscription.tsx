@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sparkles, Crown, CheckCircle2, Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import QRISPaymentModal from "@/components/qris-payment-modal";
 
@@ -105,7 +105,7 @@ export default function QrisSubscription() {
     setLoading(true);
     
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) {
         toast({
           title: "Error",

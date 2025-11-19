@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Heart, Bell, ArrowLeft, Brain, Briefcase, Lightbulb } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -201,6 +201,7 @@ const mbtiProfiles: Record<string, any> = {
 export default function SelfScreening({ onNavigate }: SelfScreeningProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('mental-health');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Mental Health State
   const [mentalAnswers, setMentalAnswers] = useState<Record<string, string>>({});
@@ -253,9 +254,7 @@ export default function SelfScreening({ onNavigate }: SelfScreeningProps) {
 
   const handleMentalSubmit = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error("Not authenticated");
 
       const totalScore = Object.values(mentalAnswers).reduce((sum, value) => sum + parseInt(value || '0'), 0);
@@ -290,9 +289,7 @@ export default function SelfScreening({ onNavigate }: SelfScreeningProps) {
 
   const handlePersonalitySubmit = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error("Not authenticated");
 
       const type = calculateMBTI();

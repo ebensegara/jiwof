@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, User, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 import ChatMessageList from './care-chat/ChatMessageList';
 import ChatInput from './care-chat/ChatInput';
@@ -92,7 +92,7 @@ export default function ProfessionalInbox() {
 
   const initializeInbox = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) {
         toast({
           title: 'Authentication Required',

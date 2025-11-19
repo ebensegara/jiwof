@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { Loader2, MessageCircle, Calendar, Users, TrendingUp, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +38,7 @@ export default function ProfessionalDashboard() {
 
   const checkProfessionalAccess = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       
       if (!user) {
         router.replace("/auth");
@@ -122,7 +122,7 @@ export default function ProfessionalDashboard() {
 
   const handleAvailabilityToggle = async (checked: boolean) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) return;
 
       const { error } = await supabase

@@ -7,7 +7,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { Loader2, Calendar as CalendarIcon } from "lucide-react";
 import QRISPaymentModal from "./qris-payment-modal";
 import { format } from "date-fns";
@@ -54,7 +54,7 @@ export default function BookingModal({
     try {
       setLoading(true);
       
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) {
         toast({
           title: "Error",

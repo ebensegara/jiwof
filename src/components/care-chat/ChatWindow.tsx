@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 import ChatMessageList from './ChatMessageList';
 import ChatInput from './ChatInput';
@@ -60,7 +60,7 @@ export default function ChatWindow({ professionalId, professionalName, onClose }
 
   const initializeChat = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) {
         toast({
           title: 'Authentication Required',
