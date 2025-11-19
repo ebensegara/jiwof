@@ -678,6 +678,8 @@ export type Database = {
           full_name: string
           id: string
           is_available: boolean | null
+          last_seen: string | null
+          online_status: boolean | null
           price_per_session: number
           rating: number | null
           specialization: string
@@ -693,6 +695,8 @@ export type Database = {
           full_name: string
           id?: string
           is_available?: boolean | null
+          last_seen?: string | null
+          online_status?: boolean | null
           price_per_session: number
           rating?: number | null
           specialization: string
@@ -708,6 +712,8 @@ export type Database = {
           full_name?: string
           id?: string
           is_available?: boolean | null
+          last_seen?: string | null
+          online_status?: boolean | null
           price_per_session?: number
           rating?: number | null
           specialization?: string
@@ -793,6 +799,60 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "screenings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          payment_ref: string | null
+          price: number
+          professional_id: string
+          schedule_time: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_ref?: string | null
+          price: number
+          professional_id: string
+          schedule_time: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          payment_ref?: string | null
+          price?: number
+          professional_id?: string
+          schedule_time?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "professionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"

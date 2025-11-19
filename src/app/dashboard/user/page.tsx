@@ -2,20 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, BookOpen, MessageCircle, Users, LogOut, User } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import MoodCheckin from "@/components/mood-checkin";
-import Journal from "@/components/journal";
-import AIChat from "@/components/ai-chat";
-import ProfessionalList from "@/components/professional-list";
 import QrisSubscription from "@/components/qris-subscription";
+import DashboardCarousel from "@/components/dashboard-carousel";
 
 export default function UserDashboard() {
-  const [activeTab, setActiveTab] = useState("mood");
   const [userName, setUserName] = useState("");
   const router = useRouter();
   const { toast } = useToast();
@@ -91,52 +85,7 @@ export default function UserDashboard() {
           <QrisSubscription />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="mood" className="flex items-center gap-2">
-              <Heart className="h-4 w-4" />
-              <span className="hidden sm:inline">Mood Check-in</span>
-            </TabsTrigger>
-            <TabsTrigger value="journal" className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Journal</span>
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageCircle className="h-4 w-4" />
-              <span className="hidden sm:inline">AI Chat</span>
-            </TabsTrigger>
-            <TabsTrigger value="professionals" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Professionals</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="mood" className="space-y-4">
-            <MoodCheckin />
-          </TabsContent>
-
-          <TabsContent value="journal" className="space-y-4">
-            <Journal />
-          </TabsContent>
-
-          <TabsContent value="chat" className="space-y-4">
-            <AIChat />
-          </TabsContent>
-
-          <TabsContent value="professionals" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Connect with Professionals
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfessionalList category="all" />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <DashboardCarousel />
       </main>
     </div>
   );

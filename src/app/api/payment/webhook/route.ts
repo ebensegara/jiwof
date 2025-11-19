@@ -136,47 +136,48 @@ async function processSubscriptionPayment(payment: any) {
 
 async function processBookingPayment(payment: any) {
   const metadata = payment.metadata || {};
-  const booking_id = metadata.booking_id;
+  const session_id = metadata.session_id;
+  const professional_id = metadata.professional_id;
 
-  if (!booking_id) {
-    console.error('Missing booking_id in payment metadata');
+  if (!session_id) {
+    console.error('Missing session_id in payment metadata');
     return;
   }
 
-  // Update booking status
-  const { error: bookingError } = await supabase
-    .from('bookings')
+  // Update session status
+  const { error: sessionError } = await supabase
+    .from('sessions')
     .update({
       status: 'paid',
     })
-    .eq('id', booking_id);
+    .eq('id', session_id);
 
-  if (bookingError) {
-    console.error('Error updating booking:', bookingError);
+  if (sessionError) {
+    console.error('Error updating session:', sessionError);
     return;
   }
 
-  // Get booking details
-  const { data: booking } = await supabase
-    .from('bookings')
+  // Get session details
+  const { data: session } = await supabase
+    .from('sessions')
     .select('user_id, professional_id')
-    .eq('id', booking_id)
+    .eq('id', session_id)
     .single();
 
-  if (booking) {
+  if (session) {
     // Check if chat channel already exists
     const { data: existingChannel } = await supabase
       .from('chat_channels')
       .select('id')
-      .eq('user_id', booking.user_id)
-      .eq('professional_id', booking.professional_id)
+      .eq('user_id', session.user_id)
+      .eq('professional_id', session.professional_id)
       .single();
 
     if (existingChannel) {
       // Update existing channel with booking_id
       const { error: updateError } = await supabase
         .from('chat_channels')
-        .update({ booking_id })
+        .update({ booking_id: session_id })
         .eq('id', existingChannel.id);
 
       if (updateError) {
@@ -187,9 +188,9 @@ async function processBookingPayment(payment: any) {
       const { error: channelError } = await supabase
         .from('chat_channels')
         .insert({
-          user_id: booking.user_id,
-          professional_id: booking.professional_id,
-          booking_id,
+          user_id: session.user_id,
+          professional_id: session.professional_id,
+          booking_id: session_id,
         });
 
       if (channelError) {
