@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, BookOpen, MessageCircle, Users, ClipboardList, TrendingUp, Palette } from "lucide-react";
+import { Heart, BookOpen, MessageCircle, Users, ClipboardList, TrendingUp, Palette, Wind } from "lucide-react";
 import MoodCheckin from "@/components/mood-checkin";
 import Journal from "@/components/journal";
 import AIChat from "@/components/ai-chat";
@@ -11,6 +11,7 @@ import SelfScreening from "@/components/dashboard-pages/self-screening";
 import WeeklyInsight from "@/components/dashboard-pages/weekly-insight";
 import HolisticCare from "@/components/dashboard-pages/holistic-care";
 import ArtTherapy from "@/components/dashboard-pages/art-therapy";
+import Relaxation from "@/components/dashboard-pages/relaxation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const pages = [
@@ -31,6 +32,12 @@ const pages = [
     title: "AI Chat",
     icon: MessageCircle,
     component: AIChat,
+  },
+  {
+    id: "relaxation",
+    title: "Relaksasi",
+    icon: Wind,
+    component: Relaxation,
   },
   {
     id: "professionals",
@@ -84,6 +91,11 @@ export default function DashboardCarousel() {
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const scrollTo = useCallback(
+    (index: number) => emblaApi && emblaApi.scrollTo(index),
+    [emblaApi]
+  );
+
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
@@ -93,17 +105,8 @@ export default function DashboardCarousel() {
     if (!emblaApi) return;
     onSelect();
     emblaApi.on("select", onSelect);
-    return () => {
-      emblaApi.off("select", onSelect);
-    };
+    emblaApi.on("reInit", onSelect);
   }, [emblaApi, onSelect]);
-
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (emblaApi) emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
 
   return (
     <div className="w-full">
