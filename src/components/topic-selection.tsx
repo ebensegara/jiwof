@@ -12,7 +12,6 @@ const topics: Topic[] = [
     icon: Brain,
     color: "bg-[#756657]/10 border-[#756657]/30",
     iconColor: "text-[#0f0e0d]",
-    webhookUrl: "https://n8n.srv1104373.hstgr.cloud/webhook/mindfulness",
   },
   {
     id: "social_relation",
@@ -21,7 +20,6 @@ const topics: Topic[] = [
     icon: Users,
     color: "bg-blue-300/10 border-blue-300/30",
     iconColor: "text-blue-700",
-    webhookUrl: "https://n8n.srv1104373.hstgr.cloud/webhook/social",
   },
   {
     id: "productivity",
@@ -30,7 +28,6 @@ const topics: Topic[] = [
     icon: Zap,
     color: "bg-green-300/10 border-green-300/30",
     iconColor: "text-green-700",
-    webhookUrl: "https://n8n.srv1104373.hstgr.cloud/webhook/productivity",
   },
   {
     id: "spiritual_guide",
@@ -39,7 +36,6 @@ const topics: Topic[] = [
     icon: Sparkles,
     color: "bg-purple-300/10 border-purple-300/30",
     iconColor: "text-purple-700",
-    webhookUrl: "https://n8n.srv1104373.hstgr.cloud/webhook/spiritual",
   },
   {
     id: "lansia",
@@ -48,7 +44,6 @@ const topics: Topic[] = [
     icon: Heart,
     color: "bg-orange-300/10 border-orange-300/30",
     iconColor: "text-orange-700",
-    webhookUrl: "https://n8n.srv1104373.hstgr.cloud/webhook/lansia",
   },
 ];
 

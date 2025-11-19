@@ -1,6 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const N8N_WEBHOOK_URL = "https://dindon.app.n8n.cloud/webhook/jiwohook";
+const TOPIC_WEBHOOKS: Record<string, string> = {
+  mindfulness: "https://n8n.srv1104373.hstgr.cloud/webhook/mindfulness",
+  social_relation: "https://n8n.srv1104373.hstgr.cloud/webhook/social",
+  productivity: "https://n8n.srv1104373.hstgr.cloud/webhook/productivity",
+  spiritual_guide: "https://n8n.srv1104373.hstgr.cloud/webhook/spiritual",
+  lansia: "https://n8n.srv1104373.hstgr.cloud/webhook/lansia",
+};
+
+const DEFAULT_WEBHOOK = "https://dindon.app.n8n.cloud/webhook/jiwohook";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,77 +22,65 @@ serve(async (req) => {
   }
 
   try {
-    const { message, userId, timestamp } = await req.json();
+    const { message, user_id, topic, timestamp } = await req.json();
 
     console.log("=== INCOMING REQUEST ===");
-    console.log("Proxying request to n8n:", { message, userId });
+    console.log("Request data:", { message, user_id, topic });
 
-    const response = await fetch(N8N_WEBHOOK_URL, {
+    const webhookUrl = topic && TOPIC_WEBHOOKS[topic] 
+      ? TOPIC_WEBHOOKS[topic] 
+      : DEFAULT_WEBHOOK;
+
+    console.log("Using webhook URL:", webhookUrl);
+
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         message,
-        userId,
-        timestamp,
+        userId: user_id,
+        topic,
+        timestamp: timestamp || new Date().toISOString(),
       }),
     });
 
     console.log("=== N8N RESPONSE ===");
     console.log("n8n response status:", response.status);
-    console.log("n8n response headers:", Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       throw new Error(`n8n webhook returned status ${response.status}`);
     }
 
     const text = await response.text();
-    console.log("=== RAW RESPONSE ===");
-    console.log("n8n raw response text:", text);
-    console.log("Response length:", text.length);
+    console.log("n8n raw response:", text);
 
     let data;
     if (text && text.trim().length > 0) {
       try {
         const parsed = JSON.parse(text);
-        console.log("=== PARSED RESPONSE ===");
-        console.log("n8n parsed data:", JSON.stringify(parsed, null, 2));
-
-        // Handle n8n array response format: [{ "output": "..." }]
+        
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].output) {
           data = { message: parsed[0].output };
-          console.log("✅ Extracted from array output:", data.message);
-        }
-        // Handle direct object with output field: { "output": "..." }
-        else if (parsed.output) {
+        } else if (parsed.output) {
           data = { message: parsed.output };
-          console.log("✅ Extracted from output field:", data.message);
-        }
-        // Handle standard message field: { "message": "..." }
-        else if (parsed.message) {
+        } else if (parsed.message) {
           data = { message: parsed.message };
-          console.log("✅ Using message field:", data.message);
-        }
-        // Fallback: use entire response as message
-        else {
+        } else {
           data = { message: text };
-          console.log("⚠️ Using raw text as message");
         }
       } catch (e) {
-        console.log("⚠️ Failed to parse JSON, using text as message");
         data = { message: text };
       }
     } else {
-      console.log("❌ EMPTY RESPONSE FROM N8N - WORKFLOW MIGHT NOT BE ACTIVE");
       data = {
-        message:
-          "Thank you for sharing. I'm here to support you on your mental health journey.",
+        message: "Thank you for sharing. I'm here to support you on your mental health journey.",
       };
     }
 
     console.log("=== FINAL RESPONSE ===");
-    console.log("Final response to return:", JSON.stringify(data, null, 2));
+    console.log("Returning:", data);
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -95,8 +91,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: error.message,
-        message:
-          "Thank you for sharing. I'm here to support you on your mental health journey.",
+        message: "Server sedang sibuk, coba lagi.",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

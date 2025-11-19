@@ -1,3 +1,5 @@
+import { supabase } from "@/lib/supabase";
+
 export interface Topic {
   id: string;
   title: string;
@@ -5,28 +7,27 @@ export interface Topic {
   icon: any;
   color: string;
   iconColor: string;
-  webhookUrl: string;
 }
 
 export async function sendTopicWebhook(topic: Topic, userId: string) {
   try {
-    const response = await fetch(topic.webhookUrl, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json" 
-      },
-      body: JSON.stringify({
-        userId,
-        topic: topic.id,
-        timestamp: new Date().toISOString(),
-      }),
-    });
+    const { data, error } = await supabase.functions.invoke(
+      'supabase-functions-n8n-webhook-proxy',
+      {
+        body: {
+          topic: topic.id,
+          user_id: userId,
+          message: `User selected topic: ${topic.title}`,
+          timestamp: new Date().toISOString(),
+        },
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(`Webhook call failed: ${response.statusText}`);
+    if (error) {
+      throw error;
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
     console.error("Error calling topic webhook:", error);
     throw error;

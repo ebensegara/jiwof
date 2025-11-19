@@ -173,7 +173,7 @@ export default function AIChat() {
       console.error("Error selecting topic:", error);
       toast({
         title: "Warning",
-        description: "Topic selected, but webhook notification failed. You can still chat.",
+        description: "Topic selected, but notification failed. You can still chat.",
         variant: "default",
       });
       setSelectedTopic(topic);
@@ -218,46 +218,23 @@ export default function AIChat() {
       setIsTyping(true);
 
       try {
-        let aiResponse;
-
-        if (selectedTopic?.webhookUrl) {
-          const webhookResponse = await fetch(selectedTopic.webhookUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        const { data, error: functionError } = await supabase.functions.invoke(
+          'supabase-functions-n8n-webhook-proxy',
+          {
+            body: {
               message: userMessage,
-              userId: user.id,
-              topic: selectedTopic.id,
+              user_id: user.id,
+              topic: selectedTopic?.id,
               timestamp: new Date().toISOString(),
-            }),
-          });
-
-          if (!webhookResponse.ok) {
-            throw new Error('Webhook call failed');
+            },
           }
+        );
 
-          const webhookData = await webhookResponse.json();
-          aiResponse = webhookData?.message || webhookData?.output || webhookData?.response || webhookData?.advice;
-        } else {
-          const { data, error: functionError } = await supabase.functions.invoke(
-            'supabase-functions-n8n-webhook-proxy',
-            {
-              body: {
-                message: userMessage,
-                userId: user.id,
-                timestamp: new Date().toISOString(),
-              },
-            }
-          );
-
-          if (functionError) {
-            throw functionError;
-          }
-
-          aiResponse = data?.message || data?.output || data?.response || data?.advice;
+        if (functionError) {
+          throw functionError;
         }
+
+        let aiResponse = data?.message || data?.output || data?.response || data?.advice;
 
         if (!aiResponse) {
           aiResponse = "Thank you for sharing. I'm here to support you on your mental health journey.";
@@ -334,9 +311,9 @@ export default function AIChat() {
         await fetchChatUsage();
 
         toast({
-          title: "Connection Issue",
-          description: "Using offline mode. Your messages are still saved.",
-          variant: "default",
+          title: "Server Error",
+          description: "Server sedang sibuk, coba lagi.",
+          variant: "destructive",
         });
       }
 
