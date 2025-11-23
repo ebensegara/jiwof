@@ -7,7 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Heart, Calendar, CheckCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from '@/components/ui/use-toast';
 
 const moodEmojis = [
@@ -36,7 +36,7 @@ export default function MoodCheckin() {
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error('Not authenticated');
 
       const currentMood = moodEmojis.find(mood => Math.round(selectedMood) === mood.value);

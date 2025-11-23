@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Send, Bot, User, AlertCircle, ArrowLeft } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import TopicSelector from "@/components/topic-selection";
@@ -154,20 +154,18 @@ export default function AIChat() {
     scrollToBottom();
   }, [messages]);
 
-  const handleTopicSelect = async (topic: Topic) => {
+  const handleTopicSelect = async (topic: string) => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error("Not authenticated");
 
       await sendTopicWebhook(topic, user.id);
 
-      setSelectedTopic(topic);
+      setSelectedTopic(topic as Topic);
       
       toast({
         title: "Topic Selected",
-        description: `You're now chatting about ${topic.title}`,
+        description: `You're now chatting about ${topic}`,
       });
     } catch (error: any) {
       console.error("Error selecting topic:", error);
@@ -176,7 +174,7 @@ export default function AIChat() {
         description: "Topic selected, but notification failed. You can still chat.",
         variant: "default",
       });
-      setSelectedTopic(topic);
+      setSelectedTopic(topic as Topic);
     }
   };
 
@@ -185,12 +183,8 @@ export default function AIChat() {
   };
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) throw new Error("Not authenticated");
 
       if (chatUsage && !chatUsage.is_premium && chatUsage.chat_count >= chatUsage.chat_limit) {

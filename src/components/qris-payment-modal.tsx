@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase, getSafeUser } from "@/lib/supabase";
 
 interface QRISPaymentModalProps {
   open: boolean;
@@ -26,6 +28,7 @@ export default function QRISPaymentModal({
 }: QRISPaymentModalProps) {
   const [status, setStatus] = useState<"pending" | "paid" | "failed">("pending");
   const [polling, setPolling] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!open || !polling) return;
@@ -55,28 +58,55 @@ export default function QRISPaymentModal({
     return () => clearInterval(interval);
   }, [open, polling, paymentData.ref_code, onSuccess]);
 
-  const handleSimulatePayment = async () => {
-    // For demo purposes - simulate successful payment
+  const handlePayment = async () => {
     try {
-      const response = await fetch("/api/payment/webhook", {
+      const user = await getSafeUser();
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to complete this payment.",
+        });
+        return;
+      }
+
+      const response = await fetch("/api/payment/qris", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ref_code: paymentData.ref_code,
-          status: "paid",
-          transaction_status: "settlement",
+          amount: paymentData.amount,
+          user_id: user.id,
         }),
       });
 
       if (response.ok) {
-        setStatus("paid");
-        setPolling(false);
-        setTimeout(() => {
-          onSuccess();
-        }, 2000);
+        const result = await response.json();
+        if (result.success) {
+          setStatus("paid");
+          setPolling(false);
+          setTimeout(() => {
+            onSuccess();
+          }, 2000);
+        } else {
+          toast({
+            title: "Payment Failed",
+            description: result.message || "Payment processing failed.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Payment Error",
+          description: "Failed to process payment. Please try again.",
+          variant: "destructive",
+        });
       }
-    } catch (error) {
-      console.error("Error simulating payment:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -110,14 +140,13 @@ export default function QRISPaymentModal({
                 Waiting for payment...
               </div>
               
-              {/* Demo button - remove in production */}
               <Button
-                onClick={handleSimulatePayment}
+                onClick={handlePayment}
                 variant="outline"
                 size="sm"
                 className="mt-4"
               >
-                Simulate Payment (Demo)
+                Pay Now
               </Button>
             </>
           )}

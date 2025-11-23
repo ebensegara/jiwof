@@ -56,7 +56,7 @@ export default function WelcomePage() {
           className="absolute inset-0 z-0"
           style={{
             backgroundImage:
-              "url(https://liqwjrzrcpdwhvpqitvh.supabase.co/storage/v1/object/public/internal_app/hand2.jpeg)",
+              "url(https://liqwjrzrcpdwhvpqitvh.supabase.co/storage/v1/object/public/internal_app/hand4.jpeg)",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",

@@ -14,7 +14,7 @@ import {
   TrendingUp,
   LogOut,
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, getSafeUser } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -128,9 +128,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
   const fetchDashboardData = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) return;
 
       // Fetch user profile

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Heart, Bell, ArrowLeft, TrendingUp, TrendingDown, Share2, Download, Calendar } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase, getSafeUser } from "@/lib/supabase";
 
 interface WeeklyInsightsProps {
   onNavigate?: (tab: string) => void;
@@ -43,14 +43,12 @@ export default function WeeklyInsights() {
   const [moodData, setMoodData] = useState<MoodData[]>([]);
 
   useEffect(() => {
-    fetchWeeklyData();
+    fetchInsights();
   }, []);
 
-  const fetchWeeklyData = async () => {
+  const fetchInsights = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSafeUser();
       if (!user) return;
 
       const oneWeekAgo = new Date();
