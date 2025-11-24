@@ -20,11 +20,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     setMounted(true);
-    
+
     // First-visit redirect logic - only runs once on mount
     if (typeof window !== "undefined") {
       const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
-      
+
       if (!hasSeenWelcome) {
         localStorage.setItem("hasSeenWelcome", "true");
         router.replace("/welcome");
@@ -54,16 +54,14 @@ export default function LoginPage() {
           .single();
 
         if (!existingUser) {
-          await supabase
-            .from("users")
-            .insert([
-              {
-                id: data.user.id,
-                email: data.user.email,
-                full_name: data.user.user_metadata?.full_name || "",
-                role: "user",
-              },
-            ]);
+          await supabase.from("users").insert([
+            {
+              id: data.user.id,
+              email: data.user.email,
+              full_name: data.user.user_metadata?.full_name || "",
+              role: "user",
+            },
+          ]);
         }
 
         toast({
@@ -149,7 +147,7 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              className="w-full bg-[#8B6CFD] hover:bg-[#7A5CE8] py-3 text-lg font-semibold"
+              className="w-full bg-[#756657] hover:bg-[#7A5CE8] py-3 text-lg font-semibold"
               disabled={loading}
             >
               {loading ? (
@@ -170,7 +168,7 @@ export default function LoginPage() {
               >
                 Belum punya akun? Daftar sekarang
               </button>
-              
+
               <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                   Apakah Anda HR Admin?
