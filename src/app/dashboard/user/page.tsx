@@ -49,7 +49,7 @@ export default function UserDashboard() {
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
-      router.replace('/welcome');
+      router.replace("/welcome");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -60,20 +60,24 @@ export default function UserDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F3F0] to-[#E8DDD2]">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-10">
+      <header className="bg-white border-b border-[#C4AB9C]/20 sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Welcome back, {userName}!
+              <h1 className="text-2xl font-bold text-[#3D3D3D]">
+                Halo, {userName}!
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-600">
                 Your mental wellness journey continues here
               </p>
             </div>
-            <Button variant="ghost" onClick={handleLogout} className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-[#3D3D3D] hover:bg-[#C4AB9C]/10"
+            >
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
@@ -86,12 +90,12 @@ export default function UserDashboard() {
         {/* Collapsible Subscription Banner */}
         {showSubscription && (
           <div className="mb-8 animate-in slide-in-from-top-2 duration-300">
-            <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border border-primary/30 rounded-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-[#E8DDD2]/30 via-[#C4AB9C]/20 to-[#E8DDD2]/30 border border-[#C4AB9C]/40 rounded-lg overflow-hidden shadow-sm">
               {/* Compact View */}
               <div className="p-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
-                  <span className="font-medium text-gray-800 dark:text-white truncate">
+                  <Sparkles className="h-5 w-5 text-[#C4AB9C] flex-shrink-0" />
+                  <span className="font-medium text-[#3D3D3D] truncate">
                     Upgrade to Premium
                   </span>
                 </div>
@@ -100,7 +104,7 @@ export default function UserDashboard() {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 border-[#C4AB9C] text-[#3D3D3D] hover:bg-[#C4AB9C]/10"
                   >
                     {isExpanded ? (
                       <>
@@ -118,7 +122,7 @@ export default function UserDashboard() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowSubscription(false)}
-                    className="h-8 w-8"
+                    className="h-8 w-8 text-[#3D3D3D] hover:bg-[#C4AB9C]/10"
                   >
                     <X className="h-4 w-4" />
                   </Button>
