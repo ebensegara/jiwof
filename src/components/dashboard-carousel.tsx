@@ -29,8 +29,8 @@ const pages = [
     title: "Mood Check-in",
     icon: Heart,
     component: MoodCheckin,
-    bgColor: "bg-[#FF6961]", //  *Beige terang
-    activeBg: "bg-[#C4AB9C]", // Taupe
+    bgColor: "bg-[#FFD3BA]", // Bright peach
+    activeBg: "bg-[#FF9A76]", // Vibrant coral
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -39,8 +39,8 @@ const pages = [
     title: "Journal",
     icon: BookOpen,
     component: Journal,
-    bgColor: "bg-[#FFDFD3]", // Beige medium
-    activeBg: "bg-[#A89080]", // Coklat medium
+    bgColor: "bg-[#C9ADA7]", // Mauve
+    activeBg: "bg-[#9A8C98]", // Deep mauve
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -49,18 +49,18 @@ const pages = [
     title: "AI Chat",
     icon: MessageCircle,
     component: AIChat,
-    bgColor: "bg-[#FDFD96]", // Cream
-    activeBg: "bg-[#8B7968]", // Coklat gelap
+    bgColor: "bg-[#FFE5B4]", // Bright cream
+    activeBg: "bg-[#FFB84D]", // Golden yellow
     textColor: "text-[#3D3D3D]",
-    activeText: "text-white",
+    activeText: "text-[#3D3D3D]",
   },
   {
     id: "relaxation",
     title: "Relaksasi",
     icon: Wind,
     component: Relaxation,
-    bgColor: "bg-[#c8ff93]", // Sandy beige
-    activeBg: "bg-[#9A8272]", // Warm taupe
+    bgColor: "bg-[#B5D3C3]", // Mint green
+    activeBg: "bg-[#7BA896]", // Sage green
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -81,8 +81,8 @@ const pages = [
         </CardContent>
       </Card>
     ),
-    bgColor: "bg-[#B3DDC4]", // Dusty beige
-    activeBg: "bg-[#7D6B5C]", // Dark taupe
+    bgColor: "bg-[#DEB887]", // Burlywood
+    activeBg: "bg-[#CD853F]", // Peru
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -91,8 +91,8 @@ const pages = [
     title: "Self Screening",
     icon: ClipboardList,
     component: SelfScreening,
-    bgColor: "bg-[#AEC6CF]", // Light tan
-    activeBg: "bg-[#B89B88]", // Warm brown
+    bgColor: "bg-[#F4C2C2]", // Baby pink
+    activeBg: "bg-[#D98B8B]", // Rose
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -101,8 +101,8 @@ const pages = [
     title: "Weekly Insights",
     icon: TrendingUp,
     component: WeeklyInsight,
-    bgColor: "bg-[#e8fafe]", // Pale cream
-    activeBg: "bg-[#A38E7E]", // Medium taupe
+    bgColor: "bg-[#B8C9E3]", // Powder blue
+    activeBg: "bg-[#7A9CC6]", // Steel blue
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -111,8 +111,8 @@ const pages = [
     title: "Holistic Care",
     icon: Heart,
     component: HolisticCare,
-    bgColor: "bg-[#E0BBE4]", // Warm beige
-    activeBg: "bg-[#91786A]", // Rich taupe
+    bgColor: "bg-[#E6C8A0]", // Tan
+    activeBg: "bg-[#C9A05A]", // Bronze
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -121,8 +121,8 @@ const pages = [
     title: "Art Therapy",
     icon: Palette,
     component: ArtTherapy,
-    bgColor: "bg-[#CFC1E8]", // Soft beige
-    activeBg: "bg-[#8F7A6B]", // Muted brown
+    bgColor: "bg-[#E0BBE4]", // Lavender
+    activeBg: "bg-[#B695C0]", // Purple
     textColor: "text-[#3D3D3D]",
     activeText: "text-white",
   },
@@ -157,7 +157,7 @@ export default function DashboardCarousel() {
     <div className="w-full">
       {/* Navigation Bar */}
       <div className="mb-8 overflow-x-auto pb-3 scrollbar-hide">
-        <div className="flex gap-3 min-w-max px-1">
+        <div className="flex gap-4 min-w-max px-1">
           {pages.map((page, index) => {
             const Icon = page.icon;
             const isActive = selectedIndex === index;
@@ -165,14 +165,16 @@ export default function DashboardCarousel() {
               <button
                 key={page.id}
                 onClick={() => scrollTo(index)}
-                className={`flex items-center gap-3 px-6 py-4 rounded-xl transition-all whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 ${
+                className={`flex flex-col items-center gap-3 px-8 py-5 rounded-2xl transition-all whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-105 min-w-[160px] ${
                   isActive
-                    ? `${page.activeBg} ${page.activeText} shadow-xl scale-105`
+                    ? `${page.activeBg} ${page.activeText} shadow-2xl scale-105 ring-4 ring-white/50`
                     : `${page.bgColor} ${page.textColor} hover:brightness-95`
                 }`}
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
-                <span className="text-base font-semibold">{page.title}</span>
+                <Icon className="h-7 w-7 flex-shrink-0" />
+                <span className="text-base font-bold text-center leading-tight">
+                  {page.title}
+                </span>
               </button>
             );
           })}
@@ -197,18 +199,21 @@ export default function DashboardCarousel() {
 
       {/* Dot Indicators */}
       <div className="flex justify-center gap-3 mt-8">
-        {pages.map((page, index) => (
-          <button
-            key={page.id}
-            onClick={() => scrollTo(index)}
-            className={`h-2.5 rounded-full transition-all shadow-sm ${
-              selectedIndex === index
-                ? `w-10 ${page.activeBg} shadow-md`
-                : `w-2.5 ${page.bgColor} hover:brightness-90`
-            }`}
-            aria-label={`Go to ${page.title}`}
-          />
-        ))}
+        {pages.map((page, index) => {
+          const isActive = selectedIndex === index;
+          return (
+            <button
+              key={page.id}
+              onClick={() => scrollTo(index)}
+              className={`h-3 rounded-full transition-all shadow-sm hover:shadow-md ${
+                isActive
+                  ? `w-12 shadow-lg ${page.activeBg}`
+                  : `w-3 hover:brightness-90 ${page.bgColor}`
+              }`}
+              aria-label={`Go to ${page.title}`}
+            />
+          );
+        })}
       </div>
 
       <style jsx global>{`
