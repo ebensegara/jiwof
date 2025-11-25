@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { Heart, BookOpen, MessageCircle, Users, ClipboardList, TrendingUp, Palette, Wind } from "lucide-react";
+import {
+  Heart,
+  BookOpen,
+  MessageCircle,
+  Users,
+  ClipboardList,
+  TrendingUp,
+  Palette,
+  Wind,
+} from "lucide-react";
 import MoodCheckin from "@/components/mood-checkin";
 import Journal from "@/components/journal";
 import AIChat from "@/components/ai-chat";
@@ -20,24 +29,40 @@ const pages = [
     title: "Mood Check-in",
     icon: Heart,
     component: MoodCheckin,
+    bgColor: "bg-[#FF6961]", //  *Beige terang
+    activeBg: "bg-[#C4AB9C]", // Taupe
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "journal",
     title: "Journal",
     icon: BookOpen,
     component: Journal,
+    bgColor: "bg-[#FFDFD3]", // Beige medium
+    activeBg: "bg-[#A89080]", // Coklat medium
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "chat",
     title: "AI Chat",
     icon: MessageCircle,
     component: AIChat,
+    bgColor: "bg-[#FDFD96]", // Cream
+    activeBg: "bg-[#8B7968]", // Coklat gelap
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "relaxation",
     title: "Relaksasi",
     icon: Wind,
     component: Relaxation,
+    bgColor: "bg-[#c8ff93]", // Sandy beige
+    activeBg: "bg-[#9A8272]", // Warm taupe
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "professionals",
@@ -56,35 +81,55 @@ const pages = [
         </CardContent>
       </Card>
     ),
+    bgColor: "bg-[#B3DDC4]", // Dusty beige
+    activeBg: "bg-[#7D6B5C]", // Dark taupe
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "screening",
     title: "Self Screening",
     icon: ClipboardList,
     component: SelfScreening,
+    bgColor: "bg-[#AEC6CF]", // Light tan
+    activeBg: "bg-[#B89B88]", // Warm brown
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "insights",
     title: "Weekly Insights",
     icon: TrendingUp,
     component: WeeklyInsight,
+    bgColor: "bg-[#e8fafe]", // Pale cream
+    activeBg: "bg-[#A38E7E]", // Medium taupe
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "holistic",
     title: "Holistic Care",
     icon: Heart,
     component: HolisticCare,
+    bgColor: "bg-[#E0BBE4]", // Warm beige
+    activeBg: "bg-[#91786A]", // Rich taupe
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
   {
     id: "art",
     title: "Art Therapy",
     icon: Palette,
     component: ArtTherapy,
+    bgColor: "bg-[#CFC1E8]", // Soft beige
+    activeBg: "bg-[#8F7A6B]", // Muted brown
+    textColor: "text-[#3D3D3D]",
+    activeText: "text-white",
   },
 ];
 
 export default function DashboardCarousel() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ 
+  const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     align: "start",
     skipSnaps: false,
@@ -93,7 +138,7 @@ export default function DashboardCarousel() {
 
   const scrollTo = useCallback(
     (index: number) => emblaApi && emblaApi.scrollTo(index),
-    [emblaApi]
+    [emblaApi],
   );
 
   const onSelect = useCallback(() => {
@@ -111,8 +156,8 @@ export default function DashboardCarousel() {
   return (
     <div className="w-full">
       {/* Navigation Bar */}
-      <div className="mb-6 overflow-x-auto pb-2">
-        <div className="flex gap-2 min-w-max">
+      <div className="mb-8 overflow-x-auto pb-3 scrollbar-hide">
+        <div className="flex gap-3 min-w-max px-1">
           {pages.map((page, index) => {
             const Icon = page.icon;
             const isActive = selectedIndex === index;
@@ -120,14 +165,14 @@ export default function DashboardCarousel() {
               <button
                 key={page.id}
                 onClick={() => scrollTo(index)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+                className={`flex items-center gap-3 px-6 py-4 rounded-xl transition-all whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 ${
                   isActive
-                    ? "bg-[#756657] text-white shadow-md"
-                    : "bg-white dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
+                    ? `${page.activeBg} ${page.activeText} shadow-xl scale-105`
+                    : `${page.bgColor} ${page.textColor} hover:brightness-95`
                 }`}
               >
-                <Icon className="h-4 w-4" />
-                <span className="text-sm font-medium">{page.title}</span>
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className="text-base font-semibold">{page.title}</span>
               </button>
             );
           })}
@@ -140,10 +185,7 @@ export default function DashboardCarousel() {
           {pages.map((page) => {
             const Component = page.component;
             return (
-              <div
-                key={page.id}
-                className="flex-[0_0_100%] min-w-0"
-              >
+              <div key={page.id} className="flex-[0_0_100%] min-w-0">
                 <div className="px-1">
                   <Component />
                 </div>
@@ -154,20 +196,30 @@ export default function DashboardCarousel() {
       </div>
 
       {/* Dot Indicators */}
-      <div className="flex justify-center gap-2 mt-6">
+      <div className="flex justify-center gap-3 mt-8">
         {pages.map((page, index) => (
           <button
             key={page.id}
             onClick={() => scrollTo(index)}
-            className={`h-2 rounded-full transition-all ${
+            className={`h-2.5 rounded-full transition-all shadow-sm ${
               selectedIndex === index
-                ? "w-8 bg-[#756657]"
-                : "w-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+                ? `w-10 ${page.activeBg} shadow-md`
+                : `w-2.5 ${page.bgColor} hover:brightness-90`
             }`}
             aria-label={`Go to ${page.title}`}
           />
         ))}
       </div>
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 }
