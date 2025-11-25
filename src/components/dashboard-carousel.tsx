@@ -88,7 +88,7 @@ const pages = [
   },
   {
     id: "screening",
-    title: "Self Screening",
+    title: "Test Mandiri",
     icon: ClipboardList,
     component: SelfScreening,
     bgColor: "bg-[#F4C2C2]", // Baby pink
