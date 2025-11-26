@@ -56,7 +56,7 @@ export default function WelcomePage() {
           className="absolute inset-0 z-0"
           style={{
             backgroundImage:
-              "url(https://liqwjrzrcpdwhvpqitvh.supabase.co/storage/v1/object/public/internal_app/hand4.jpeg)",
+              "url(https://liqwjrzrcpdwhvpqitvh.supabase.co/storage/v1/object/public/internal_app/hero5.png)",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
@@ -91,7 +91,7 @@ export default function WelcomePage() {
               </Button>
               <Button
                 size="lg"
-                variant="outline"
+                //          variant="outline"
                 onClick={() => router.push("/auth")}
                 className="border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 rounded-xl"
               >
@@ -119,15 +119,15 @@ export default function WelcomePage() {
       {/* Fitur Lengkap Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F5F3F0]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#3D3D3D] mb-12 text-center">
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#eb7454] mb-12 text-center">
             Fitur Lengkap untuk Kesejahteraanmu
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* AI Chat */}
             <div className="bg-[#FFE8D6] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <MessageCircle className="h-7 w-7 text-[#C4AB9C]" />
+              <div className="w-14 h-14 bg-[#ed953e]/40 rounded-xl flex items-center justify-center mb-6">
+                <MessageCircle className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
                 AI Chat
@@ -141,7 +141,7 @@ export default function WelcomePage() {
             {/* Journal */}
             <div className="bg-[#B7B7A4] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <BookOpen className="h-7 w-7 text-[#C4AB9C]" />
+                <BookOpen className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
                 Journal
@@ -155,7 +155,7 @@ export default function WelcomePage() {
             {/* Mood Tracking */}
             <div className="bg-[#DDBEA9] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <Heart className="h-7 w-7 text-[#C4AB9C]" />
+                <Heart className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
                 Mood Tracking
@@ -169,7 +169,7 @@ export default function WelcomePage() {
             {/* Self-Screening */}
             <div className="bg-[#C8BDAF] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <ClipboardList className="h-7 w-7 text-[#C4AB9C]" />
+                <ClipboardList className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
                 Self-Screening
@@ -183,7 +183,7 @@ export default function WelcomePage() {
             {/* Insights */}
             <div className="bg-[#CEB797] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <TrendingUp className="h-7 w-7 text-[#C4AB9C]" />
+                <TrendingUp className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
                 Insights
@@ -197,10 +197,10 @@ export default function WelcomePage() {
             {/* Professional */}
             <div className="bg-[#A59E8D] p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
               <div className="w-14 h-14 bg-[#E8DDD2]/40 rounded-xl flex items-center justify-center mb-6">
-                <Users className="h-7 w-7 text-[#C4AB9C]" />
+                <Users className="h-7 w-7 text-black" />
               </div>
               <h3 className="text-2xl font-bold text-[#3D3D3D] mb-3">
-                Professional Marketplace
+                Akses Professional
               </h3>
               <p className="text-gray-600">
                 Akses ke psikolog dan konselor profesional tersertifikasi.
@@ -213,7 +213,7 @@ export default function WelcomePage() {
       {/* Perawatan Holistik Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#E8DDD2]">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold text-[#3D3D3D] mb-12 text-center">
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#eb7454] mb-12 text-center">
             Perawatan Holistik untuk Jiwa
           </h2>
 
