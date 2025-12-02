@@ -1,19 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+const midtransServerKey = process.env.MIDTRANS_SERVER_KEY!;
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string): boolean {
+  const hash = crypto
+    .createHash('sha512')
+    .update(`${orderId}${statusCode}${grossAmount}${midtransServerKey}`)
+    .digest('hex');
+  return hash === signatureKey;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { ref_code, status, transaction_status } = body;
+    const {
+      order_id,
+      status_code,
+      gross_amount,
+      signature_key,
+      transaction_status,
+      fraud_status,
+    } = body;
+
+    // Verify signature
+    if (signature_key && !verifySignature(order_id, status_code, gross_amount, signature_key)) {
+      console.error('Invalid signature for order:', order_id);
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 403 }
+      );
+    }
+
+    const ref_code = order_id || body.ref_code;
 
     if (!ref_code) {
       return NextResponse.json(
-        { error: 'Missing ref_code' },
+        { error: 'Missing ref_code or order_id' },
         { status: 400 }
       );
     }
@@ -33,12 +61,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Update payment status
-    const paymentStatus = transaction_status === 'settlement' || status === 'paid' ? 'paid' : 'failed';
+    let paymentStatus = 'pending';
+    if (transaction_status === 'capture' || transaction_status === 'settlement') {
+      if (!fraud_status || fraud_status === 'accept') {
+        paymentStatus = 'paid';
+      }
+    } else if (transaction_status === 'cancel' || transaction_status === 'deny' || transaction_status === 'expire') {
+      paymentStatus = 'failed';
+    } else if (body.status === 'paid') {
+      paymentStatus = 'paid';
+    }
     
     const { error: updateError } = await supabase
       .from('payments')
       .update({ 
         status: paymentStatus,
+        midtrans_response: body,
         updated_at: new Date().toISOString()
       })
       .eq('id', payment.id);

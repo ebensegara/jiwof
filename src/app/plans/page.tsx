@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
-import QRISPaymentModal from "@/components/qris-payment-modal";
+import PayWithSnap from "@/components/payments/PayWithSnap";
 
 interface Plan {
   id: string;
@@ -23,8 +23,9 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [paymentData, setPaymentData] = useState<any>(null);
-  const [showQRModal, setShowQRModal] = useState(false);
+  const [snapToken, setSnapToken] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
+  const [processingPlanId, setProcessingPlanId] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -56,6 +57,7 @@ export default function PlansPage() {
   const handleSubscribe = async (plan: Plan) => {
     try {
       setSelectedPlan(plan);
+      setProcessingPlanId(plan.id);
       
       const user = await getSafeUser();
       if (!user) {
@@ -63,8 +65,8 @@ export default function PlansPage() {
         return;
       }
 
-      // Create payment
-      const response = await fetch("/api/payment/qris", {
+      // Create payment with Midtrans Snap
+      const response = await fetch("/api/payment/charge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -81,11 +83,11 @@ export default function PlansPage() {
 
       const result = await response.json();
       
-      if (result.success) {
-        setPaymentData(result);
-        setShowQRModal(true);
+      if (result.success && result.snap_token) {
+        setSnapToken(result.snap_token);
+        setShowPayment(true);
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || "Failed to create payment");
       }
     } catch (error: any) {
       toast({
@@ -93,16 +95,43 @@ export default function PlansPage() {
         description: error.message || "Failed to create payment",
         variant: "destructive",
       });
+    } finally {
+      setProcessingPlanId(null);
     }
   };
 
   const handlePaymentSuccess = () => {
-    setShowQRModal(false);
+    setShowPayment(false);
+    setSnapToken(null);
     toast({
       title: "Subscription Active! 🎉",
       description: "Your subscription has been activated successfully",
     });
     router.push("/");
+  };
+
+  const handlePaymentPending = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Pending",
+      description: "Please complete your payment to activate subscription",
+    });
+  };
+
+  const handlePaymentError = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Failed",
+      description: "There was an error processing your payment",
+      variant: "destructive",
+    });
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    setSnapToken(null);
   };
 
   if (loading) {
@@ -163,9 +192,17 @@ export default function PlansPage() {
               <CardFooter>
                 <Button
                   onClick={() => handleSubscribe(plan)}
+                  disabled={processingPlanId === plan.id}
                   className="w-full bg-[#756657] hover:bg-[#756657]/90 text-white"
                 >
-                  Subscribe Now
+                  {processingPlanId === plan.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Subscribe Now"
+                  )}
                 </Button>
               </CardFooter>
             </Card>
@@ -173,12 +210,15 @@ export default function PlansPage() {
         </div>
       </div>
 
-      {showQRModal && paymentData && (
-        <QRISPaymentModal
-          open={showQRModal}
-          onClose={() => setShowQRModal(false)}
-          paymentData={paymentData}
+      {/* Snap Payment - Auto opens when token is ready */}
+      {showPayment && snapToken && (
+        <PayWithSnap
+          snapToken={snapToken}
           onSuccess={handlePaymentSuccess}
+          onPending={handlePaymentPending}
+          onError={handlePaymentError}
+          onClose={handlePaymentClose}
+          autoOpen={true}
         />
       )}
     </div>

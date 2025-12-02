@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Sparkles, Crown, CheckCircle2, Loader2 } from "lucide-react";
 import { supabase, getSafeUser } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
-import QRISPaymentModal from "@/components/qris-payment-modal";
+import PayWithSnap from "@/components/payments/PayWithSnap";
 
 interface SubscriptionStatus {
   isActive: boolean;
@@ -35,10 +35,10 @@ export default function QrisSubscription() {
     daysRemaining: null,
   });
   const [showPlanModal, setShowPlanModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const [snapToken, setSnapToken] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -115,35 +115,31 @@ export default function QrisSubscription() {
         return;
       }
 
-      // Create payment record
-      const refCode = `SUB-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const qrisLink = `https://api.qris.id/v1/qr?amount=${plan.price}&ref=${refCode}`;
-
-      const { data: payment, error } = await supabase
-        .from("payments")
-        .insert({
+      // Create payment with Midtrans Snap
+      const response = await fetch("/api/payment/charge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           user_id: user.id,
           amount: plan.price,
           payment_type: "subscription",
-          ref_code: refCode,
-          qris_link: qrisLink,
-          status: "pending",
-          metadata: { plan_id: plan.id },
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setPaymentData({
-        payment_id: payment.id,
-        qris_link: qrisLink,
-        ref_code: refCode,
-        amount: plan.price,
+          metadata: {
+            plan_id: plan.id,
+            plan_name: plan.name,
+            duration_days: plan.duration_days,
+          },
+        }),
       });
 
-      setShowPlanModal(false);
-      setShowPaymentModal(true);
+      const result = await response.json();
+
+      if (result.success && result.snap_token) {
+        setSnapToken(result.snap_token);
+        setShowPlanModal(false);
+        setShowPayment(true);
+      } else {
+        throw new Error(result.error || "Failed to create payment");
+      }
     } catch (error: any) {
       toast({
         title: "Error",
@@ -160,8 +156,33 @@ export default function QrisSubscription() {
       title: "Payment Successful!",
       description: "Your subscription has been activated",
     });
-    setShowPaymentModal(false);
+    setShowPayment(false);
+    setSnapToken(null);
     await fetchSubscriptionStatus();
+  };
+
+  const handlePaymentPending = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Pending",
+      description: "Please complete your payment to activate subscription",
+    });
+  };
+
+  const handlePaymentError = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Failed",
+      description: "There was an error processing your payment",
+      variant: "destructive",
+    });
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    setSnapToken(null);
   };
 
   return (
@@ -312,12 +333,15 @@ export default function QrisSubscription() {
         </DialogContent>
       </Dialog>
 
-      {paymentData && (
-        <QRISPaymentModal
-          open={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          paymentData={paymentData}
+      {/* Snap Payment - Auto opens when token is ready */}
+      {showPayment && snapToken && (
+        <PayWithSnap
+          snapToken={snapToken}
           onSuccess={handlePaymentSuccess}
+          onPending={handlePaymentPending}
+          onError={handlePaymentError}
+          onClose={handlePaymentClose}
+          autoOpen={true}
         />
       )}
     </>
