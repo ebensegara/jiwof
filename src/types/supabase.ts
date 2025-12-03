@@ -19,6 +19,7 @@ export type Database = {
           created_at: string | null
           id: string
           notes: string | null
+          payment_ref: string | null
           price: number
           professional_id: string
           session_time: string
@@ -30,6 +31,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
+          payment_ref?: string | null
           price: number
           professional_id: string
           session_time: string
@@ -41,6 +43,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
+          payment_ref?: string | null
           price?: number
           professional_id?: string
           session_time?: string
@@ -597,9 +600,12 @@ export type Database = {
           created_at: string | null
           id: string
           metadata: Json | null
+          midtrans_response: Json | null
           payment_type: string
           qris_link: string | null
+          qris_string: string | null
           ref_code: string | null
+          snap_token: string | null
           status: string | null
           updated_at: string | null
           user_id: string
@@ -609,9 +615,12 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
+          midtrans_response?: Json | null
           payment_type: string
           qris_link?: string | null
+          qris_string?: string | null
           ref_code?: string | null
+          snap_token?: string | null
           status?: string | null
           updated_at?: string | null
           user_id: string
@@ -621,9 +630,12 @@ export type Database = {
           created_at?: string | null
           id?: string
           metadata?: Json | null
+          midtrans_response?: Json | null
           payment_type?: string
           qris_link?: string | null
+          qris_string?: string | null
           ref_code?: string | null
+          snap_token?: string | null
           status?: string | null
           updated_at?: string | null
           user_id?: string

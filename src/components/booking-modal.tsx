@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase, getSafeUser } from "@/lib/supabase";
 import { Loader2, Calendar as CalendarIcon } from "lucide-react";
-import QRISPaymentModal from "./qris-payment-modal";
+import PayWithSnap from "@/components/payments/PayWithSnap";
 import { format } from "date-fns";
 
 interface BookingModalProps {
@@ -33,8 +33,8 @@ export default function BookingModal({
   const [time, setTime] = useState("10:00");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const [snapToken, setSnapToken] = useState<string | null>(null);
+  const [showPayment, setShowPayment] = useState(false);
   const { toast } = useToast();
 
   const timeSlots = [
@@ -85,8 +85,8 @@ export default function BookingModal({
 
       if (bookingError) throw bookingError;
 
-      // Create payment
-      const response = await fetch("/api/payment/qris", {
+      // Create payment with Midtrans Snap
+      const response = await fetch("/api/payment/charge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -95,6 +95,8 @@ export default function BookingModal({
           payment_type: "booking",
           metadata: {
             booking_id: booking.id,
+            session_id: booking.id,
+            professional_id: professional.id,
             professional_name: professional.full_name,
             session_time: sessionDateTime.toISOString(),
           },
@@ -103,11 +105,11 @@ export default function BookingModal({
 
       const result = await response.json();
       
-      if (result.success) {
-        setPaymentData(result);
-        setShowQRModal(true);
+      if (result.success && result.snap_token) {
+        setSnapToken(result.snap_token);
+        setShowPayment(true);
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || "Failed to create payment");
       }
     } catch (error: any) {
       toast({
@@ -121,13 +123,38 @@ export default function BookingModal({
   };
 
   const handlePaymentSuccess = () => {
-    setShowQRModal(false);
+    setShowPayment(false);
+    setSnapToken(null);
     onClose();
     toast({
       title: "Booking Confirmed! 🎉",
       description: "Your session has been booked successfully",
     });
     onSuccess();
+  };
+
+  const handlePaymentPending = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Pending",
+      description: "Please complete your payment to confirm booking",
+    });
+  };
+
+  const handlePaymentError = () => {
+    setShowPayment(false);
+    setSnapToken(null);
+    toast({
+      title: "Payment Failed",
+      description: "There was an error processing your payment",
+      variant: "destructive",
+    });
+  };
+
+  const handlePaymentClose = () => {
+    setShowPayment(false);
+    setSnapToken(null);
   };
 
   // Disable past dates
@@ -139,7 +166,7 @@ export default function BookingModal({
 
   return (
     <>
-      <Dialog open={open && !showQRModal} onOpenChange={onClose}>
+      <Dialog open={open && !showPayment} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Book Session with {professional.full_name}</DialogTitle>
@@ -216,12 +243,15 @@ export default function BookingModal({
         </DialogContent>
       </Dialog>
 
-      {showQRModal && paymentData && (
-        <QRISPaymentModal
-          open={showQRModal}
-          onClose={() => setShowQRModal(false)}
-          paymentData={paymentData}
+      {/* Snap Payment - Auto opens when token is ready */}
+      {showPayment && snapToken && (
+        <PayWithSnap
+          snapToken={snapToken}
           onSuccess={handlePaymentSuccess}
+          onPending={handlePaymentPending}
+          onError={handlePaymentError}
+          onClose={handlePaymentClose}
+          autoOpen={true}
         />
       )}
     </>
